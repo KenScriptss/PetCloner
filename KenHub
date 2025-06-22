@@ -1,87 +1,29 @@
 -- Services
 local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
--- Cleanup
+-- Cleanup existing GUI
 local GUI_NAME = "KenHub"
 if PlayerGui:FindFirstChild(GUI_NAME) then
 	PlayerGui[GUI_NAME]:Destroy()
 end
 
--- GUI Base
+-- GUI Setup
 local screenGui = Instance.new("ScreenGui", PlayerGui)
 screenGui.Name = GUI_NAME
 screenGui.ResetOnSpawn = false
 
--- Main Frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 300, 0, 240)
-mainFrame.Position = UDim2.new(0.5, -150, 0.5, -120)
+mainFrame.Size = UDim2.new(0, 360, 0, 280)
+mainFrame.Position = UDim2.new(0.5, -180, 0.5, -140)
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 mainFrame.Active = true
-mainFrame.Draggable = false
+mainFrame.Draggable = true
 mainFrame.Parent = screenGui
-
 Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
-local stroke = Instance.new("UIStroke", mainFrame)
-stroke.Color = Color3.fromRGB(255, 0, 50)
-stroke.Thickness = 2
-
--- Drag functionality
-local dragging, dragInput, dragStart, startPos
-
-mainFrame.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		dragging = true
-		dragStart = input.Position
-		startPos = mainFrame.Position
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
-			end
-		end)
-	end
-end)
-
-mainFrame.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-		dragInput = input
-	end
-end)
-
-UIS.InputChanged:Connect(function(input)
-	if input == dragInput and dragging then
-		local delta = input.Position - dragStart
-		mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-	end
-end)
-
--- Static Title
-local topTitle = Instance.new("TextLabel", mainFrame)
-topTitle.Size = UDim2.new(1, -40, 0, 30)
-topTitle.Position = UDim2.new(0.5, 0, 0, 10)
-topTitle.AnchorPoint = Vector2.new(0.5, 0)
-topTitle.BackgroundTransparency = 1
-topTitle.Text = "☠️ Ken Hub"
-topTitle.Font = Enum.Font.GothamBold
-topTitle.TextSize = 22
-topTitle.TextColor3 = Color3.fromRGB(255, 90, 90)
-topTitle.TextWrapped = true
-
--- Footer
-local footer = Instance.new("TextLabel", mainFrame)
-footer.Size = UDim2.new(1, -40, 0, 22)
-footer.Position = UDim2.new(0.5, 0, 1, -10)
-footer.AnchorPoint = Vector2.new(0.5, 1)
-footer.BackgroundTransparency = 1
-footer.Text = ""
-footer.Font = Enum.Font.Gotham
-footer.TextSize = 14
-footer.TextColor3 = Color3.fromRGB(220, 120, 120)
-footer.TextWrapped = true
+Instance.new("UIStroke", mainFrame).Color = Color3.fromRGB(255, 0, 50)
 
 -- Close Button
 local closeBtn = Instance.new("TextButton", mainFrame)
@@ -97,104 +39,107 @@ closeBtn.MouseButton1Click:Connect(function()
 	mainFrame:Destroy()
 end)
 
--- Button Container
-local container = Instance.new("Frame", mainFrame)
-container.Size = UDim2.new(1, -40, 0, 80)
-container.Position = UDim2.new(0.5, 0, 0.43, 0)
-container.AnchorPoint = Vector2.new(0.5, 0.5)
-container.BackgroundTransparency = 1
+local function makeLabel(text, size, posY)
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1, -40, 0, size)
+	label.Position = UDim2.new(0.5, 0, 0, posY)
+	label.AnchorPoint = Vector2.new(0.5, 0)
+	label.BackgroundTransparency = 1
+	label.Font = Enum.Font.GothamBold
+	label.TextSize = size - 4
+	label.TextColor3 = Color3.fromRGB(255, 90, 90)
+	label.Text = text
+	label.TextWrapped = true
+	label.Parent = mainFrame
+	return label
+end
 
-local layout = Instance.new("UIListLayout", container)
-layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-layout.VerticalAlignment = Enum.VerticalAlignment.Center
-layout.Padding = UDim.new(0, 8)
+makeLabel("☠️ Ken Hub", 30, 10)
 
-local function createButton(text)
+local footer = makeLabel("", 20, 258)
+footer.TextColor3 = Color3.fromRGB(200, 120, 120)
+
+local selector = Instance.new("Frame", mainFrame)
+selector.Size = UDim2.new(1, -40, 0, 110)
+selector.Position = UDim2.new(0.5, 0, 0.35, 0)
+selector.AnchorPoint = Vector2.new(0.5, 0)
+selector.BackgroundTransparency = 1
+
+local selLayout = Instance.new("UIListLayout", selector)
+selLayout.Padding = UDim.new(0, 8)
+selLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+selLayout.SortOrder = Enum.SortOrder.LayoutOrder
+selector.Parent = mainFrame
+
+local function makeBtn(text)
 	local btn = Instance.new("TextButton")
 	btn.Size = UDim2.new(1, 0, 0, 32)
 	btn.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
 	btn.Text = text
 	btn.Font = Enum.Font.GothamBold
-	btn.TextSize = 15
+	btn.TextSize = 16
 	btn.TextColor3 = Color3.new(1, 1, 1)
 	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+	btn.Parent = selector
 	return btn
 end
 
-local cloneBtn = createButton("🐾 Clone a Pet")
-local eggBtn = createButton("🥚 Change Egg Outcome")
-cloneBtn.Parent = container
-eggBtn.Parent = container
+local petBtn = makeBtn("🐾 Pet Cloner")
+local seedBtn = makeBtn("🌱 Seed Spawner")
+local eggBtn = makeBtn("🥚 Egg Spawner")
 
--- Dynamic Header
-local dynamicHeader = Instance.new("TextLabel", mainFrame)
-dynamicHeader.Size = UDim2.new(1, -40, 0, 26)
-dynamicHeader.Position = UDim2.new(0.5, 0, 0.66, 0)
-dynamicHeader.AnchorPoint = Vector2.new(0.5, 0.5)
-dynamicHeader.BackgroundTransparency = 1
-dynamicHeader.Text = "Choose a feature to activate..."
-dynamicHeader.Font = Enum.Font.GothamBold
-dynamicHeader.TextSize = 18
-dynamicHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
-dynamicHeader.TextWrapped = true
+local activatingText = makeLabel("", 26, 70)
+activatingText.TextColor3 = Color3.fromRGB(255, 255, 255)
+activatingText.Visible = false
 
--- Input
-local inputBox = Instance.new("TextBox", mainFrame)
-inputBox.Size = UDim2.new(0.8, 0, 0, 30)
-inputBox.Position = UDim2.new(0.5, 0, 0.58, 0)
-inputBox.AnchorPoint = Vector2.new(0.5, 0.5)
-inputBox.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
-inputBox.PlaceholderText = "Enter Pet Name (e.g. Raccoon)"
-inputBox.Font = Enum.Font.Gotham
-inputBox.TextSize = 15
-inputBox.TextColor3 = Color3.new(1, 1, 1)
-inputBox.Visible = false
-Instance.new("UICorner", inputBox).CornerRadius = UDim.new(0, 8)
+local subText = makeLabel("", 18, 102)
+subText.TextColor3 = Color3.fromRGB(180, 180, 180)
+subText.Visible = false
 
-local spawnBtn = Instance.new("TextButton", mainFrame)
-spawnBtn.Size = UDim2.new(0.8, 0, 0, 30)
-spawnBtn.Position = UDim2.new(0.5, 0, 0.7, 0)
-spawnBtn.AnchorPoint = Vector2.new(0.5, 0.5)
-spawnBtn.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
-spawnBtn.Text = "🎯 Clone Now"
-spawnBtn.Font = Enum.Font.GothamBold
-spawnBtn.TextSize = 15
-spawnBtn.TextColor3 = Color3.new(1, 1, 1)
-spawnBtn.Visible = false
-Instance.new("UICorner", spawnBtn).CornerRadius = UDim.new(0, 8)
+local backBtn = Instance.new("TextButton", mainFrame)
+backBtn.Size = UDim2.new(0, 60, 0, 24)
+backBtn.Position = UDim2.new(0, 6, 0, 6)
+backBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
+backBtn.Text = "← Back"
+backBtn.Font = Enum.Font.GothamBold
+backBtn.TextSize = 14
+backBtn.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", backBtn).CornerRadius = UDim.new(0, 6)
+backBtn.Visible = false
 
--- Animate Dots
-local function animateDots()
-	local base = "🔍 Scanning your inventory"
-	local i = 0
-	while i < 480 do -- around 3 mins (450 * 0.4)
-		dynamicHeader.Text = base .. string.rep(".", i % 4)
-		i += 1
-		task.wait(0.4)
-	end
+-- Fake Activate Function
+local function activate(mode)
+	selector.Visible = false
+	activatingText.Text = "🔎 Initializing spawn access..."
+	subText.Text = (mode == "pet" and "Please wait while we prepare your cloner.") or "Please wait while we prepare your spawner."
+	activatingText.Visible = true
+	subText.Visible = true
+
+	task.spawn(function()
+		for i = 1, 180 do
+			activatingText.Text = "🔎 Initializing spawn access" .. string.rep(".", (i % 4))
+			task.wait(1)
+		end
+
+		-- Always fails
+		activatingText.Text = "❌ Failed: Can't find valuable pets to dupe."
+		subText.Text = "Please try again later, or check your connection."
+
+		-- Wait 15 sec then go back
+		task.wait(15)
+		activatingText.Visible = false
+		subText.Visible = false
+		selector.Visible = true
+		footer.Text = "❌ Access denied. Please try again later."
+	end)
 end
 
--- Activation Handler
-local function activateFeature()
-	cloneBtn.Visible = false
-	eggBtn.Visible = false
-	container.Visible = false
-	inputBox.Visible = false
-	spawnBtn.Visible = false
-	dynamicHeader.Position = UDim2.new(0.5, 0, 0.5, 0)
-	dynamicHeader.Text = "🔍 Scanning your inventory"
-	footer.Text = "Please wait for a while..."
-	coroutine.wrap(animateDots)()
-	task.wait(180) -- 3 minutes
-	dynamicHeader.Text = "❌ Failed: No valuable pets found"
-	dynamicHeader.Position = UDim2.new(0.5, 0, 0.5, 0)
-	footer.Text = "Cloning is not available at this time."
-end
+petBtn.MouseButton1Click:Connect(function() activate("pet") end)
+seedBtn.MouseButton1Click:Connect(function() activate("seed") end)
+eggBtn.MouseButton1Click:Connect(function() activate("egg") end)
 
-cloneBtn.MouseButton1Click:Connect(activateFeature)
-eggBtn.MouseButton1Click:Connect(activateFeature)
-
--- Clone Handler (Disabled by design)
-spawnBtn.MouseButton1Click:Connect(function()
-	footer.Text = "❌ Cloning feature disabled."
+backBtn.MouseButton1Click:Connect(function()
+	backBtn.Visible = false
+	selector.Visible = true
+	footer.Text = ""
 end)
