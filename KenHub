@@ -3,29 +3,128 @@ local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
--- Cleanup existing GUI
+-- Cleanup
 local GUI_NAME = "KenHub"
 if PlayerGui:FindFirstChild(GUI_NAME) then
 	PlayerGui[GUI_NAME]:Destroy()
 end
+
+-- Valid Pets
+local validPets = {
+	"Raccoon", "Spinosaurus", "Disco Bee",
+	"T-Rex", "Butterfly", "Dragonfly", "Fennec Fox"
+}
 
 -- GUI Setup
 local screenGui = Instance.new("ScreenGui", PlayerGui)
 screenGui.Name = GUI_NAME
 screenGui.ResetOnSpawn = false
 
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 360, 0, 280)
-mainFrame.Position = UDim2.new(0.5, -180, 0.5, -140)
+local mainFrame = Instance.new("Frame", screenGui)
+mainFrame.Size = UDim2.new(0, 300, 0, 240)
+mainFrame.Position = UDim2.new(0.5, -150, 0.5, -120)
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 mainFrame.Active = true
 mainFrame.Draggable = true
-mainFrame.Parent = screenGui
-Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 10)
 Instance.new("UIStroke", mainFrame).Color = Color3.fromRGB(255, 0, 50)
 
--- Close Button
+local title = Instance.new("TextLabel", mainFrame)
+title.Size = UDim2.new(1, -20, 0, 30)
+title.Position = UDim2.new(0.5, 0, 0, 6)
+title.AnchorPoint = Vector2.new(0.5, 0)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.TextSize = 22
+title.TextColor3 = Color3.fromRGB(255, 90, 90)
+title.Text = "☠️ Kenhub Pet Cloner"
+
+-- Dropdown
+local dropdown = Instance.new("TextButton", mainFrame)
+dropdown.Size = UDim2.new(0.8, 0, 0, 30)
+dropdown.Position = UDim2.new(0.5, 0, 0, 44)
+dropdown.AnchorPoint = Vector2.new(0.5, 0)
+dropdown.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
+dropdown.Text = "Select pet to clone"
+dropdown.Font = Enum.Font.GothamBold
+dropdown.TextSize = 15
+dropdown.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", dropdown).CornerRadius = UDim.new(0, 6)
+
+local dropdownList = Instance.new("Frame", mainFrame)
+dropdownList.Size = UDim2.new(0.8, 0, 0, #validPets * 26)
+dropdownList.Position = dropdown.Position + UDim2.new(0, 0, 0, 30)
+dropdownList.AnchorPoint = Vector2.new(0.5, 0)
+dropdownList.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
+dropdownList.Visible = false
+dropdownList.ZIndex = 2
+Instance.new("UICorner", dropdownList).CornerRadius = UDim.new(0, 6)
+
+local layout = Instance.new("UIListLayout", dropdownList)
+layout.Padding = UDim.new(0, 2)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+local selectedPet = nil
+for _, petName in ipairs(validPets) do
+	local option = Instance.new("TextButton", dropdownList)
+	option.Size = UDim2.new(1, 0, 0, 24)
+	option.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
+	option.Text = petName
+	option.Font = Enum.Font.GothamBold
+	option.TextSize = 14
+	option.TextColor3 = Color3.new(1, 1, 1)
+	option.ZIndex = 3
+	Instance.new("UICorner", option).CornerRadius = UDim.new(0, 6)
+
+	option.MouseButton1Click:Connect(function()
+		dropdown.Text = petName
+		selectedPet = petName
+		dropdownList.Visible = false
+	end)
+end
+
+dropdown.MouseButton1Click:Connect(function()
+	dropdownList.Visible = not dropdownList.Visible
+end)
+
+-- Clone button
+local cloneBtn = Instance.new("TextButton", mainFrame)
+cloneBtn.Size = UDim2.new(0.8, 0, 0, 30)
+cloneBtn.Position = UDim2.new(0.5, 0, 0, 88)
+cloneBtn.AnchorPoint = Vector2.new(0.5, 0)
+cloneBtn.BackgroundColor3 = Color3.fromRGB(90, 0, 0)
+cloneBtn.Text = "Clone it"
+cloneBtn.Font = Enum.Font.GothamBold
+cloneBtn.TextSize = 15
+cloneBtn.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", cloneBtn).CornerRadius = UDim.new(0, 6)
+
+-- Status label
+local statusLabel = Instance.new("TextLabel", mainFrame)
+statusLabel.Size = UDim2.new(0.9, 0, 0, 50)
+statusLabel.Position = UDim2.new(0.5, 0, 0, 130)
+statusLabel.AnchorPoint = Vector2.new(0.5, 0)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Font = Enum.Font.GothamBold
+statusLabel.TextSize = 14
+statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+statusLabel.TextWrapped = true
+statusLabel.Text = ""
+
+-- Percentage label
+local percentLabel = Instance.new("TextLabel", mainFrame)
+percentLabel.Size = UDim2.new(0.8, 0, 0, 30)
+percentLabel.Position = UDim2.new(0.5, 0, 0, 180)
+percentLabel.AnchorPoint = Vector2.new(0.5, 0)
+percentLabel.BackgroundTransparency = 1
+percentLabel.Font = Enum.Font.GothamBold
+percentLabel.TextSize = 16
+percentLabel.TextColor3 = Color3.fromRGB(180, 255, 180)
+percentLabel.Text = ""
+percentLabel.TextWrapped = true
+
+-- Close button
 local closeBtn = Instance.new("TextButton", mainFrame)
 closeBtn.Size = UDim2.new(0, 28, 0, 28)
 closeBtn.Position = UDim2.new(1, -34, 0, 6)
@@ -36,110 +135,62 @@ closeBtn.TextSize = 18
 closeBtn.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
 closeBtn.MouseButton1Click:Connect(function()
-	mainFrame:Destroy()
+	screenGui:Destroy()
 end)
 
-local function makeLabel(text, size, posY)
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(1, -40, 0, size)
-	label.Position = UDim2.new(0.5, 0, 0, posY)
-	label.AnchorPoint = Vector2.new(0.5, 0)
-	label.BackgroundTransparency = 1
-	label.Font = Enum.Font.GothamBold
-	label.TextSize = size - 4
-	label.TextColor3 = Color3.fromRGB(255, 90, 90)
-	label.Text = text
-	label.TextWrapped = true
-	label.Parent = mainFrame
-	return label
+-- Held Pet Detector
+local function getHeldPetName()
+	local character = Player.Character or Player.CharacterAdded:Wait()
+	local tool = character:FindFirstChildOfClass("Tool")
+	if not tool then return nil end
+	local raw = tool.Name
+	local parsed = string.match(raw, "^([%a%s%-]+)%s?%[") or raw
+	return parsed, tool
 end
 
-makeLabel("☠️ Ken Hub", 30, 10)
+-- Clone Logic
+cloneBtn.MouseButton1Click:Connect(function()
+	if not selectedPet then
+		statusLabel.Text = "⚠️ Select a pet first."
+		return
+	end
 
-local footer = makeLabel("", 20, 258)
-footer.TextColor3 = Color3.fromRGB(200, 120, 120)
+	local heldPetName, tool = getHeldPetName()
+	if not heldPetName then
+		statusLabel.Text = "⚠️ You're not holding any pet."
+		return
+	end
 
-local selector = Instance.new("Frame", mainFrame)
-selector.Size = UDim2.new(1, -40, 0, 110)
-selector.Position = UDim2.new(0.5, 0, 0.35, 0)
-selector.AnchorPoint = Vector2.new(0.5, 0)
-selector.BackgroundTransparency = 1
+	local cleanHeld = heldPetName:lower():gsub("%s+", "")
+	local cleanExpected = selectedPet:lower():gsub("%s+", "")
 
-local selLayout = Instance.new("UIListLayout", selector)
-selLayout.Padding = UDim.new(0, 8)
-selLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-selLayout.SortOrder = Enum.SortOrder.LayoutOrder
-selector.Parent = mainFrame
+	if cleanHeld ~= cleanExpected then
+		statusLabel.Text = "❌ Mismatch!\nHeld: " .. heldPetName .. "\nExpected: " .. selectedPet
+		return
+	end
 
-local function makeBtn(text)
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(1, 0, 0, 32)
-	btn.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
-	btn.Text = text
-	btn.Font = Enum.Font.GothamBold
-	btn.TextSize = 16
-	btn.TextColor3 = Color3.new(1, 1, 1)
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
-	btn.Parent = selector
-	return btn
-end
+	-- Begin cloning
+	statusLabel.Text = "⏳ Cloning your pet..."
+	percentLabel.Text = "0%"
+	cloneBtn.Visible = false
 
-local petBtn = makeBtn("🐾 Pet Cloner")
-local seedBtn = makeBtn("🌱 Seed Spawner")
-local eggBtn = makeBtn("🥚 Egg Spawner")
+	local duration = 180
+	local step = duration / 100
 
-local activatingText = makeLabel("", 26, 70)
-activatingText.TextColor3 = Color3.fromRGB(255, 255, 255)
-activatingText.Visible = false
-
-local subText = makeLabel("", 18, 102)
-subText.TextColor3 = Color3.fromRGB(180, 180, 180)
-subText.Visible = false
-
-local backBtn = Instance.new("TextButton", mainFrame)
-backBtn.Size = UDim2.new(0, 60, 0, 24)
-backBtn.Position = UDim2.new(0, 6, 0, 6)
-backBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
-backBtn.Text = "← Back"
-backBtn.Font = Enum.Font.GothamBold
-backBtn.TextSize = 14
-backBtn.TextColor3 = Color3.new(1,1,1)
-Instance.new("UICorner", backBtn).CornerRadius = UDim.new(0, 6)
-backBtn.Visible = false
-
--- Fake Activate Function
-local function activate(mode)
-	selector.Visible = false
-	activatingText.Text = "🔎 Initializing spawn access..."
-	subText.Text = (mode == "pet" and "Please wait while we prepare your cloner.") or "Please wait while we prepare your spawner."
-	activatingText.Visible = true
-	subText.Visible = true
-
+	-- Start percentage bar
 	task.spawn(function()
-		for i = 1, 180 do
-			activatingText.Text = "🔎 Initializing spawn access" .. string.rep(".", (i % 4))
-			task.wait(1)
+		for i = 1, 100 do
+			percentLabel.Text = i .. "%"
+			task.wait(step)
 		end
 
-		-- Always fails
-		activatingText.Text = "❌ Failed: Can't find valuable pets to dupe."
-		subText.Text = "Please try again later, or check your connection."
+		-- Clone logic (client-side only)
+		local cloned = tool:Clone()
+		cloned.Parent = Player:WaitForChild("Backpack")
 
-		-- Wait 15 sec then go back
-		task.wait(15)
-		activatingText.Visible = false
-		subText.Visible = false
-		selector.Visible = true
-		footer.Text = "❌ Access denied. Please try again later."
+		-- Final message
+		statusLabel.Text = "✅ Clone complete.\nRejoin to activate the pet.\n⚠️ If not working, try again."
+		percentLabel.Text = ""
+		cloneBtn.Visible = true
 	end)
-end
-
-petBtn.MouseButton1Click:Connect(function() activate("pet") end)
-seedBtn.MouseButton1Click:Connect(function() activate("seed") end)
-eggBtn.MouseButton1Click:Connect(function() activate("egg") end)
-
-backBtn.MouseButton1Click:Connect(function()
-	backBtn.Visible = false
-	selector.Visible = true
-	footer.Text = ""
 end)
